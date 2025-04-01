@@ -186,17 +186,17 @@ namespace RepoLastStandMod.Patches
     [HarmonyPatch(typeof(PhysGrabObjectImpactDetector))]
     public static class PhysGrabObjectImpactDetectorPatches
     {
-        [HarmonyPatch("DestroyObjectRPC")]
-        [HarmonyPrefix]
-        public static void DestroyObjectRPCPrefix(bool effects, ValuableObject ___valuableObject)
+        [HarmonyPatch("BreakRPC")]
+        [HarmonyPostfix]
+        public static void BreakRPCPostfix()
         {
-            if (SemiFunc.RunIsLevel() && ___valuableObject is not null)
+            if (SemiFunc.RunIsLevel())
             {
-                OnValuableObjectDestroyed(___valuableObject);
+                AfterValuableObjectBreak();
             }
         }
 
-        private static void OnValuableObjectDestroyed(ValuableObject valuableObject)
+        private static void AfterValuableObjectBreak()
         {
             var roundHaulGoal = RoundDirector.instance.GetInternalHaulGoal();
             // RepoLastStandMod.LoggerInstance.LogInfo($"Round haul goal: {roundHaulGoal}");
@@ -210,14 +210,11 @@ namespace RepoLastStandMod.Patches
             var currentLevelValuablesValue = GetLevelValuablesValue();
             // RepoLastStandMod.LoggerInstance.LogInfo($"Current level valuables value: {currentLevelValuablesValue}");
 
-            var levelValuablesValueAfterValuableDestroyed = currentLevelValuablesValue - valuableObject.dollarValueCurrent;
-            // RepoLastStandMod.LoggerInstance.LogInfo($"Level valuables value after valuable destroyed: {levelValuablesValueAfterValuableDestroyed}");
+            var adjustedLevelValuablesValue = currentLevelValuablesValue + extractedValuablesValue;
+            // RepoLastStandMod.LoggerInstance.LogInfo($"Adjusted level valuables value: {adjustedLevelValuablesValue}");
 
-            var adjustedLevelValuablesValueAfterValuableDestroyed = levelValuablesValueAfterValuableDestroyed + extractedValuablesValue;
-            // RepoLastStandMod.LoggerInstance.LogInfo($"Adjusted level valuables value after valuable destroyed: {adjustedLevelValuablesValueAfterValuableDestroyed}");
-
-            var canStillExtract = adjustedLevelValuablesValueAfterValuableDestroyed >= roundHaulGoal;
-            // RepoLastStandMod.LoggerInstance.LogInfo($"Can still extract: {canStillExtract}");
+            var canStillExtract = adjustedLevelValuablesValue >= roundHaulGoal;
+            RepoLastStandMod.LoggerInstance.LogInfo($"Can still extract: {canStillExtract}");
 
             if (canStillExtract || StateManager.Instance.LastStandActive)
             {
@@ -274,13 +271,6 @@ namespace RepoLastStandMod.Patches
         [HarmonyPatch("StartRoundLogic")]
         [HarmonyPrefix]
         public static void StartRoundLogicPrefix(int value)
-        {
-            StateManager.Instance.LastStandActive = false;
-        }
-
-        [HarmonyPatch("ExtractionCompletedAllRPC")]
-        [HarmonyPrefix]
-        public static void ExtractionCompletedAllRPCPrefix()
         {
             StateManager.Instance.LastStandActive = false;
         }
