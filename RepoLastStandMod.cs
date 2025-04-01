@@ -277,12 +277,5 @@ namespace RepoLastStandMod.Patches
         {
             StateManager.Instance.LastStandActive = false;
         }
-
-        [HarmonyPatch("ExtractionCompletedAllRPC")]
-        [HarmonyPrefix]
-        public static void ExtractionCompletedAllRPCPrefix()
-        {
-            StateManager.Instance.LastStandActive = false;
-        }
     }
 }
