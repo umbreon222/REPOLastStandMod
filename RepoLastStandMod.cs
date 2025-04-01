@@ -115,10 +115,10 @@ namespace RepoLastStandMod
         private void InitializeState()
         {
             StateManager.Instance.LastStandActive = false;
-            StateManager.Instance.PityWeapons = BuildPityWeaponArray();
+            StateManager.Instance.PityWeapons = [.. BuildPityWeapons()]; // Iterate to ensure config generation
         }
 
-        private IEnumerable<ProbabilityItem<Prefab>> BuildPityWeaponArray()
+        private IEnumerable<ProbabilityItem<Prefab>> BuildPityWeapons()
         {
             // Pistol
             var pistolProbability = Config.Bind("General", "HandgunProbability", 0.15f, "Probability between 0 and 1 of spawning a handgun");
